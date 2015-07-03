@@ -9,6 +9,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#define MATH_PI 3.14159265359f
+
 using namespace std;
 
 SDL_Window* window;
@@ -32,8 +34,8 @@ unsigned int tex;
 glm::vec3 posBox[10];
 
 glm::vec3 camPos;
-glm::vec3 camFront;
-glm::vec3 camUp;
+
+GLfloat camYaw, camPitch, lastX, lastY;
 
 unsigned int LoadImage(string path)
 {
@@ -260,34 +262,68 @@ void Start()
 	glBindVertexArray(0);
 
 	camPos = glm::vec3(0.0f, 0.0f, -3.0f);
-	camFront = glm::vec3(0.0f, 0.0f, 1.0f);
-	camUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	camYaw = 0.0f;
+	camPitch = 0.0f;
+	lastX = 400.0f;
+	lastY = 300.0f;
+
+	SDL_WarpMouseInWindow(window, lastX, lastY);
 }
 
-void Controller(GLfloat speed)
+void MouseController()
+{
+	int mX, mY;
+	SDL_GetMouseState(&mX, &mY);
+
+	camYaw += 0.005f * (lastX-mX);
+	camPitch += 0.005f * (lastY-mY);
+
+	SDL_WarpMouseInWindow(window, lastX, lastY);
+
+	if(camYaw/(MATH_PI/180.0f) > 360.0f)
+	{
+		camYaw = 0.0f;
+	}
+	else if(camYaw/(MATH_PI/180.0f) <= 0.0f)
+	{
+		camYaw = 360.0f*(MATH_PI/180.0f);
+	}
+
+	if(camPitch/(MATH_PI/180.0f) > 90.0f)
+	{
+		camPitch = 90.0f*(MATH_PI/180.0f);
+	}
+	else if(camPitch/(MATH_PI/180.0f) < -90.0f)
+	{
+		camPitch = -90.0f*(MATH_PI/180.0f);
+	}
+}
+
+void KeyboardController(glm::vec3 dir, glm::vec3 right, GLfloat speed)
 {
 	const Uint8* state = SDL_GetKeyboardState(NULL);
 	if(state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W])
 	{	
-		camPos += speed * camFront;
+		camPos += speed * dir;
 	}
 	else if(state[SDL_SCANCODE_DOWN] || state[SDL_SCANCODE_S])
 	{	
-		camPos -= speed * camFront;
+		camPos -= speed * dir;
 	}
-	else if(state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A])
+	if(state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A])
 	{	
-		camPos -= glm::normalize(glm::cross(camFront, camUp)) * speed;
+		camPos -= speed * right;
 	}
 	else if(state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D])
 	{	
-		camPos += glm::normalize(glm::cross(camFront, camUp)) * speed;
+		camPos += speed * right;
 	}
 }
 
 void Update()
 {
-	Controller(0.0025f);
+	MouseController();
 
 	num += 0.0001f;
 
@@ -295,7 +331,13 @@ void Update()
 	glm::mat4 view;
 
 	projection = glm::perspective(45.0f, 800.0f/600.0f, 0.1f, 100.0f);
-	view = glm::lookAt(camPos, camPos + camFront, camUp);
+
+	glm::vec3 camDir(cosf(camPitch) * sinf(camYaw), sinf(camPitch), cosf(camPitch) * cosf(camYaw));
+	glm::vec3 camRight(sinf(camYaw - MATH_PI/2.0f), 0.0f, cosf(camYaw - MATH_PI/2.0f));
+	glm::vec3 camUp = cross(camRight, camDir);
+
+	view = glm::lookAt(camPos, camPos + camDir, camUp);
+	KeyboardController(camDir, camRight, 0.0025f);
 
 	glUseProgram(program);
 
