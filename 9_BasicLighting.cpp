@@ -360,6 +360,10 @@ void Update()
 	GLfloat lightX = sinf(SDL_GetTicks() * 0.0005f) * 10.0f;
 	GLfloat lightZ = cosf(SDL_GetTicks() * 0.0005f) * 10.0f;
 
+	GLfloat colorR = sinf(SDL_GetTicks() * 0.0002f);
+	GLfloat colorG = sinf(SDL_GetTicks() * 0.00007f);
+	GLfloat colorB = sinf(SDL_GetTicks() * 0.00013f);
+
 	glm::mat4 projection;
 	glm::mat4 view;
 
@@ -381,10 +385,10 @@ void Update()
 	glUniformMatrix4fv(gProj[0], 1, GL_FALSE, glm::value_ptr(projection));
 	glUniformMatrix4fv(gView[0], 1, GL_FALSE, glm::value_ptr(view));
 	
-	glUniform1f(gAmbientStrength, 0.2f);
+	glUniform1f(gAmbientStrength, 0.1f);
 	glUniform1f(gSpecularStrength, 1.0f);
-	glUniform3f(gObjectColor[0], 1.0f, 1.0f, 1.0f);
-	glUniform3f(gLightColor, 1.0f, 1.0f, 1.0f);
+	glUniform3f(gObjectColor[0], 0.8f, 0.8f, 0.8f);
+	glUniform3f(gLightColor, colorR, colorG, colorB);
 	glUniform3f(gLightPosition, lightX, 1.0f, lightZ);
 
 	glBindVertexArray(VAO);
@@ -405,7 +409,7 @@ void Update()
 	glUniformMatrix4fv(gProj[1], 1, GL_FALSE, glm::value_ptr(projection));
 	glUniformMatrix4fv(gView[1], 1, GL_FALSE, glm::value_ptr(view));
 
-	glUniform3f(gObjectColor[1], 1.0f, 1.0f, 1.0f);
+	glUniform3f(gObjectColor[1], colorR, colorG, colorB);
 	glBindVertexArray(lightVAO);
 		glm::mat4 light;
 		light = glm::translate(light, glm::vec3(lightX, 1.0f, lightZ));
