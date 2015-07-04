@@ -23,7 +23,9 @@ GLuint fragmentShader;
 
 GLuint VAO, VBO;
 
-GLuint gTransformation;
+GLuint gProj;
+GLuint gView;
+GLuint gModel;
 
 GLuint gTexture1;
 
@@ -166,7 +168,7 @@ void Init()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 	SDL_Init(SDL_INIT_EVERYTHING);
-	window = SDL_CreateWindow("Lab1 - Create Box 1 million Object", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
+	window = SDL_CreateWindow("Lab1 - Create Box 100,000 Vertex", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
 	
 	IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
 
@@ -176,12 +178,14 @@ void Init()
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-	LoadShader("source/shader/Shader4.vs", "source/shader/Shader4.fs");
+	LoadShader("source/shader/Shader4_2.vs", "source/shader/Shader4.fs");
 }
 
 void Start()
 {
-	gTransformation = glGetUniformLocation(program, "gWorld");
+	gProj = glGetUniformLocation(program, "gProjection");
+	gView = glGetUniformLocation(program, "gView");
+	gModel = glGetUniformLocation(program, "gModel");
 	
 	gTexture1 = glGetUniformLocation(program, "outTexture1");
 
@@ -348,8 +352,11 @@ void Update()
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glUniform1i(gTexture1, 0);
 
+	glUniformMatrix4fv(gProj, 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(gView, 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(gModel, 1, GL_FALSE, glm::value_ptr(model));
+
 	glBindVertexArray(VAO);
-		glUniformMatrix4fv(gTransformation, 1, GL_FALSE, glm::value_ptr(projection * view * model));
 		glDrawArrays(GL_TRIANGLES, 0, 3600000);
 	glBindVertexArray(0);
 }
