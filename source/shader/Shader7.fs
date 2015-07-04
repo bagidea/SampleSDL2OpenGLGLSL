@@ -15,6 +15,11 @@ uniform vec3 objectColor;
 uniform vec3 lightColor;
 uniform vec3 lightPosition;
 uniform vec3 viewPosition;
+uniform float shininess;
+
+uniform float constant;
+uniform float linear;
+uniform float quadratic;
 
 void main()
 {
@@ -23,15 +28,23 @@ void main()
 
 	//Diffuse
 	vec3 norm = normalize(normal);
-	vec3 lightDir = normalize(lightPosition - fragPosition);
+	vec3 lightDir = normalize(lightPosition-fragPosition);
 	float diff = max(dot(norm, lightDir), 0.0f);
 	vec3 diffuse = lightColor * diff * vec3(texture(outTexture1, texCoord));
 
 	//Specular
 	vec3 viewDir = normalize(viewPosition - fragPosition);
-	vec3 reflectDir = reflect(lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 64);
+	vec3 reflectDir = reflect(-lightDir, norm);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0f), shininess);
 	vec3 specular = specularStrength * spec * lightColor * vec3(texture(outSpecular, texCoord));
+
+	//Attenuation
+	float distance = length(lightPosition-fragPosition);
+	float attenuation = 1.0f / (constant + linear * distance + quadratic * (distance * distance));
+
+	ambient *= attenuation;
+	diffuse *= attenuation;
+	specular *= attenuation;
 
 	vec3 result = (ambient + diffuse + specular) * objectColor;
 	Color = vec4(result, 1.0f);
