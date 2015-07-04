@@ -13,9 +13,17 @@ uniform float specularStrength;
 
 uniform vec3 objectColor;
 uniform vec3 lightColor;
-uniform vec3 lightDirection;
+uniform vec3 lightPosition;
 uniform vec3 viewPosition;
 uniform float shininess;
+
+uniform float constant;
+uniform float linear;
+uniform float quadratic;
+
+uniform vec3 lightDirection;
+uniform float cutOff;
+uniform float outerCutOff;
 
 void main()
 {
@@ -24,7 +32,7 @@ void main()
 
 	//Diffuse
 	vec3 norm = normalize(normal);
-	vec3 lightDir = normalize(-lightDirection);
+	vec3 lightDir = normalize(lightPosition-fragPosition);
 	float diff = max(dot(norm, lightDir), 0.0f);
 	vec3 diffuse = lightColor * diff * vec3(texture(outTexture1, texCoord));
 
@@ -33,6 +41,21 @@ void main()
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0f), shininess);
 	vec3 specular = specularStrength * spec * lightColor * vec3(texture(outSpecular, texCoord));
+
+	//Spot Light (Soft Edges)
+	float theta = dot(lightDir, normalize(-lightDirection));
+	float epsilon = (cutOff - outerCutOff);
+	float intensity = clamp((theta - outerCutOff) / epsilon, 0.0f, 1.0f);
+	diffuse *= intensity;
+	specular *= intensity;
+
+	//Attenuation
+	float distance = length(lightPosition-fragPosition);
+	float attenuation = 1.0f / (constant + linear * distance + quadratic * (distance * distance));
+
+	ambient *= attenuation;
+	diffuse *= attenuation;
+	specular *= attenuation;
 
 	vec3 result = (ambient + diffuse + specular) * objectColor;
 	Color = vec4(result, 1.0f);
