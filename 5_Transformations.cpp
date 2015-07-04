@@ -170,7 +170,7 @@ void Init()
 	glewInit();
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-	LoadShader("source/shader/Shader4.vs", "source/shader/Shader4.fs");
+	LoadShader("shader/Shader4.vs", "shader/Shader4.fs");
 }
 
 void Start()

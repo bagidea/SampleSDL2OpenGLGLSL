@@ -178,7 +178,7 @@ void Init()
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-	LoadShader("source/shader/Shader4_2.vs", "source/shader/Shader4.fs");
+	LoadShader("shader/Shader4_2.vs", "shader/Shader4.fs");
 }
 
 void Start()

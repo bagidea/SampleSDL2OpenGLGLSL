@@ -109,7 +109,7 @@ void Init()
 	SDL_GL_SetSwapInterval(0);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-	LoadShader("source/shader/Shader2.vs", "source/shader/Shader2.fs");
+	LoadShader("shader/Shader2.vs", "shader/Shader2.fs");
 }
 
 void Start()
