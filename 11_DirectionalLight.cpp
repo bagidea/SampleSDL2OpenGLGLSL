@@ -16,22 +16,22 @@ using namespace std;
 SDL_Window* window;
 SDL_GLContext gl;
 
-GLuint program[2];
-GLuint vertexShader[2];
-GLuint fragmentShader[2];
+GLuint program[1];
+GLuint vertexShader[1];
+GLuint fragmentShader[1];
 
-GLuint VAO, lightVAO, VBO;
+GLuint VAO, VBO;
 
-GLuint gProj[2];
-GLuint gView[2];
-GLuint gModel[2];
+GLuint gProj;
+GLuint gView;
+GLuint gModel;
 
 GLuint gAmbientStrength;
 GLuint gSpecularStrength;
 GLuint gTexture1;
 GLuint gTexture2;
 
-GLuint gObjectColor[2];
+GLuint gObjectColor;
 GLuint gLightColor;
 GLuint gLightPosition;
 
@@ -188,25 +188,20 @@ void Init()
 	glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 
 	LoadShader("source/shader/Shader5.vs", "source/shader/Shader6.fs", 0);
-	LoadShader("source/shader/Shader5_2.vs", "source/shader/Shader5_2.fs", 1);
 }
 
 void Start()
 {
-	gProj[0] = glGetUniformLocation(program[0], "gProjection");
-	gView[0] = glGetUniformLocation(program[0], "gView");
-	gModel[0] = glGetUniformLocation(program[0], "gModel");
-	gProj[1] = glGetUniformLocation(program[1], "gProjection");
-	gView[1] = glGetUniformLocation(program[1], "gView");
-	gModel[1] = glGetUniformLocation(program[1], "gModel");
+	gProj = glGetUniformLocation(program[0], "gProjection");
+	gView = glGetUniformLocation(program[0], "gView");
+	gModel = glGetUniformLocation(program[0], "gModel");
 
 	gAmbientStrength = glGetUniformLocation(program[0], "ambientStrength");
 	gSpecularStrength = glGetUniformLocation(program[0], "specularStrength");
 	gTexture1 = glGetUniformLocation(program[0], "outTexture1");
 	gTexture2 = glGetUniformLocation(program[0], "outSpecular");
 
-	gObjectColor[0] = glGetUniformLocation(program[0], "objectColor");
-	gObjectColor[1] = glGetUniformLocation(program[1], "objectColor");
+	gObjectColor = glGetUniformLocation(program[0], "objectColor");
 	gLightColor = glGetUniformLocation(program[0], "lightColor");
 	gLightPosition = glGetUniformLocation(program[0], "lightPosition");
 
@@ -261,7 +256,6 @@ void Start()
 	};
 
 	glGenVertexArrays(1, &VAO);
-	glGenVertexArrays(1, &lightVAO);
 	glGenBuffers(1, &VBO);
 
 	glBindVertexArray(VAO);
@@ -273,13 +267,6 @@ void Start()
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(2);
-	glBindVertexArray(0);
-
-	glBindVertexArray(lightVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vec), vec, GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-		glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 
 	camPos = glm::vec3(3.0f, 2.0f, -5.0f);
@@ -348,9 +335,6 @@ void Update()
 
 	num += 0.001f;
 
-	GLfloat lightX = 20.0f;
-	GLfloat lightZ = -20.0f;
-
 	glm::mat4 projection;
 	glm::mat4 view;
 
@@ -373,14 +357,14 @@ void Update()
 	glBindTexture(GL_TEXTURE_2D, tex2);
 	glUniform1i(gTexture2, 1);
 
-	glUniformMatrix4fv(gProj[0], 1, GL_FALSE, glm::value_ptr(projection));
-	glUniformMatrix4fv(gView[0], 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(gProj, 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(gView, 1, GL_FALSE, glm::value_ptr(view));
 	
 	glUniform1f(gAmbientStrength, 0.2f);
 	glUniform1f(gSpecularStrength, 1.0f);
-	glUniform3f(gObjectColor[0], 0.8f, 0.8f, 0.8f);
+	glUniform3f(gObjectColor, 0.8f, 0.8f, 0.8f);
 	glUniform3f(gLightColor, 1.0f, 1.0f, 1.0f);
-	glUniform3f(gLightPosition, lightX+3.0f, 20.0f, lightZ+3.0f);
+	glUniform3f(gLightPosition, -10.0f, -5.0f, 10.0f);
 
 	glBindVertexArray(VAO);
 		int lineX = 0;
@@ -390,7 +374,7 @@ void Update()
 			glm::mat4 model;
 			model = glm::translate(model, glm::vec3(lineX * 2.0f, 0.0f, lineZ * 2.0f));
 
-			glUniformMatrix4fv(gModel[0], 1, GL_FALSE, glm::value_ptr(model));
+			glUniformMatrix4fv(gModel, 1, GL_FALSE, glm::value_ptr(model));
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -401,20 +385,6 @@ void Update()
 				lineZ++;
 			}
 		}
-	glBindVertexArray(0);
-
-	glUseProgram(program[1]);
-
-	glUniformMatrix4fv(gProj[1], 1, GL_FALSE, glm::value_ptr(projection));
-	glUniformMatrix4fv(gView[1], 1, GL_FALSE, glm::value_ptr(view));
-
-	glUniform3f(gObjectColor[1], 1.0f, 1.0f, 1.0f);
-	glBindVertexArray(lightVAO);
-		glm::mat4 light;
-		light = glm::translate(light, glm::vec3(lightX+3.0f, 20.0f, lightZ+3.0f));
-		light = glm::scale(light, glm::vec3(5.0f, 5.0f, 5.0f));
-		glUniformMatrix4fv(gModel[1], 1, GL_FALSE, glm::value_ptr(light));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 }
 
