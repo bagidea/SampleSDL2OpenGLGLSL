@@ -9,6 +9,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#define MATH_PI 3.14159265359f
+
 using namespace std;
 
 SDL_Window* window;
@@ -25,6 +27,7 @@ GLuint gView[2];
 GLuint gModel[2];
 
 GLuint gAmbientStrength;
+GLuint gSpecularStrength;
 GLuint gTexture1;
 
 GLuint gObjectColor[2];
@@ -37,6 +40,9 @@ bool chk;
 unsigned int tex;
 
 glm::vec3 posBox[10];
+
+glm::vec3 camPos;
+GLfloat camYaw, camPitch, lastX, lastY;
 
 unsigned int LoadImage(string path)
 {
@@ -195,6 +201,7 @@ void Start()
 	gModel[1] = glGetUniformLocation(program[1], "gModel");
 
 	gAmbientStrength = glGetUniformLocation(program[0], "ambientStrength");
+	gSpecularStrength = glGetUniformLocation(program[0], "specularStrength");
 	gTexture1 = glGetUniformLocation(program[0], "outTexture1");
 
 	gObjectColor[0] = glGetUniformLocation(program[0], "objectColor");
@@ -283,10 +290,71 @@ void Start()
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
+
+	camPos = glm::vec3(0.0f, 0.0f, 5.0f);
+
+	camYaw = 180.0f*(MATH_PI/180.0f);
+	camPitch = 0.0f;
+	lastX = 400.0f;
+	lastY = 300.0f;
+
+	SDL_WarpMouseInWindow(window, lastX, lastY);
+}
+
+void MouseController()
+{
+	int mX, mY;
+	SDL_GetMouseState(&mX, &mY);
+
+	camYaw += 0.005f * (lastX-mX);
+	camPitch += 0.005f * (lastY-mY);
+
+	SDL_WarpMouseInWindow(window, lastX, lastY);
+
+	if(camYaw/(MATH_PI/180.0f) > 360.0f)
+	{
+		camYaw = 0.0f;
+	}
+	else if(camYaw/(MATH_PI/180.0f) <= 0.0f)
+	{
+		camYaw = 360.0f*(MATH_PI/180.0f);
+	}
+
+	if(camPitch/(MATH_PI/180.0f) > 90.0f)
+	{
+		camPitch = 90.0f*(MATH_PI/180.0f);
+	}
+	else if(camPitch/(MATH_PI/180.0f) < -90.0f)
+	{
+		camPitch = -90.0f*(MATH_PI/180.0f);
+	}
+}
+
+void KeyboardController(glm::vec3 dir, glm::vec3 right, GLfloat speed)
+{
+	const Uint8* state = SDL_GetKeyboardState(NULL);
+	if(state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W])
+	{	
+		camPos += speed * dir;
+	}
+	else if(state[SDL_SCANCODE_DOWN] || state[SDL_SCANCODE_S])
+	{	
+		camPos -= speed * dir;
+	}
+	if(state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A])
+	{	
+		camPos -= speed * right;
+	}
+	else if(state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D])
+	{	
+		camPos += speed * right;
+	}
 }
 
 void Update()
 {
+	MouseController();
+
 	num += 0.001f;
 
 	GLfloat lightX = sinf(SDL_GetTicks() * 0.0005f) * 10.0f;
@@ -296,7 +364,13 @@ void Update()
 	glm::mat4 view;
 
 	projection = glm::perspective(45.0f, 800.0f/600.0f, 0.1f, 100.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
+	
+	glm::vec3 camDir(cosf(camPitch) * sinf(camYaw), sinf(camPitch), cosf(camPitch) * cosf(camYaw));
+	glm::vec3 camRight(sinf(camYaw - MATH_PI/2.0f), 0.0f, cosf(camYaw - MATH_PI/2.0f));
+	glm::vec3 camUp = cross(camRight, camDir);
+
+	view = glm::lookAt(camPos, camPos + camDir, camUp);
+	KeyboardController(camDir, camRight, 0.0025f);
 
 	glUseProgram(program[0]);
 
@@ -308,6 +382,7 @@ void Update()
 	glUniformMatrix4fv(gView[0], 1, GL_FALSE, glm::value_ptr(view));
 	
 	glUniform1f(gAmbientStrength, 0.2f);
+	glUniform1f(gSpecularStrength, 1.0f);
 	glUniform3f(gObjectColor[0], 1.0f, 1.0f, 1.0f);
 	glUniform3f(gLightColor, 1.0f, 1.0f, 1.0f);
 	glUniform3f(gLightPosition, lightX, 1.0f, lightZ);

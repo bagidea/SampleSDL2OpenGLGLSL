@@ -34,7 +34,6 @@ unsigned int tex;
 glm::vec3 posBox[10];
 
 glm::vec3 camPos;
-
 GLfloat camYaw, camPitch, lastX, lastY;
 
 unsigned int LoadImage(string path)
