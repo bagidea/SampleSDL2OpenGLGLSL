@@ -24,7 +24,7 @@ void main()
 	float diff = max(dot(norm, lightDir), 0.0f);
 	vec3 diffuse = diff * lightColor;
 
-	vec3 result = (ambient * diffuse) * objectColor;
+	vec3 result = (ambient + diffuse) * objectColor;
 
 	Color = texture(outTexture1, texCoord) * vec4(result, 1.0f);
 }

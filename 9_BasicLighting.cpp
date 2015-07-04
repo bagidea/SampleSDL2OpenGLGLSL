@@ -14,20 +14,20 @@ using namespace std;
 SDL_Window* window;
 SDL_GLContext gl;
 
-GLuint program;
-GLuint vertexShader;
-GLuint fragmentShader;
+GLuint program[2];
+GLuint vertexShader[2];
+GLuint fragmentShader[2];
 
-GLuint VAO, VBO;
+GLuint VAO, lightVAO, VBO;
 
-GLuint gProj;
-GLuint gView;
-GLuint gModel;
+GLuint gProj[2];
+GLuint gView[2];
+GLuint gModel[2];
 
 GLuint gAmbientStrength;
 GLuint gTexture1;
 
-GLuint gObjectColor;
+GLuint gObjectColor[2];
 GLuint gLightColor;
 GLuint gLightPosition;
 
@@ -135,26 +135,26 @@ GLuint CompileShader(string text, unsigned int shaderType)
 	return shader;
 }
 
-void LoadShader(string _vertexShader, string _fragmentShader)
+void LoadShader(string _vertexShader, string _fragmentShader, int id)
 {
-	program = glCreateProgram();
-	vertexShader = CompileShader(LoadFile(_vertexShader), GL_VERTEX_SHADER);
-	fragmentShader = CompileShader(LoadFile(_fragmentShader), GL_FRAGMENT_SHADER);
+	program[id] = glCreateProgram();
+	vertexShader[id] = CompileShader(LoadFile(_vertexShader), GL_VERTEX_SHADER);
+	fragmentShader[id] = CompileShader(LoadFile(_fragmentShader), GL_FRAGMENT_SHADER);
 
-	if(vertexShader == NULL && fragmentShader == NULL)
+	if(vertexShader[id] == NULL && fragmentShader[id] == NULL)
 	{
 		cout << "Compile Shader Fail." << endl;
 	}else{
-		glAttachShader(program, vertexShader);
-		glAttachShader(program, fragmentShader);
-		glLinkProgram(program);
+		glAttachShader(program[id], vertexShader[id]);
+		glAttachShader(program[id], fragmentShader[id]);
+		glLinkProgram(program[id]);
 
 		GLint success;
-		glGetProgramiv(program, GL_LINK_STATUS, &success);
+		glGetProgramiv(program[id], GL_LINK_STATUS, &success);
 		if(!success)
 		{
 			GLchar error[1024];
-			glGetProgramInfoLog(program, 1024, NULL, error);
+			glGetProgramInfoLog(program[id], 1024, NULL, error);
 			cout << error << endl;	
 		}
 	}
@@ -181,21 +181,26 @@ void Init()
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 
-	LoadShader("source/shader/Shader5.vs", "source/shader/Shader5.fs");
+	LoadShader("source/shader/Shader5.vs", "source/shader/Shader5.fs", 0);
+	LoadShader("source/shader/Shader5_2.vs", "source/shader/Shader5_2.fs", 1);
 }
 
 void Start()
 {
-	gProj = glGetUniformLocation(program, "gProjection");
-	gView = glGetUniformLocation(program, "gView");
-	gModel = glGetUniformLocation(program, "gModel");
+	gProj[0] = glGetUniformLocation(program[0], "gProjection");
+	gView[0] = glGetUniformLocation(program[0], "gView");
+	gModel[0] = glGetUniformLocation(program[0], "gModel");
+	gProj[1] = glGetUniformLocation(program[1], "gProjection");
+	gView[1] = glGetUniformLocation(program[1], "gView");
+	gModel[1] = glGetUniformLocation(program[1], "gModel");
 
-	gAmbientStrength = glGetUniformLocation(program, "ambientStrength");
-	gTexture1 = glGetUniformLocation(program, "outTexture1");
+	gAmbientStrength = glGetUniformLocation(program[0], "ambientStrength");
+	gTexture1 = glGetUniformLocation(program[0], "outTexture1");
 
-	gObjectColor = glGetUniformLocation(program, "objectColor");
-	gLightColor = glGetUniformLocation(program, "lightColor");
-	gLightPosition = glGetUniformLocation(program, "lightPosition");
+	gObjectColor[0] = glGetUniformLocation(program[0], "objectColor");
+	gObjectColor[1] = glGetUniformLocation(program[1], "objectColor");
+	gLightColor = glGetUniformLocation(program[0], "lightColor");
+	gLightPosition = glGetUniformLocation(program[0], "lightPosition");
 
 	num = 0.0f;
 	chk = false;
@@ -258,6 +263,7 @@ void Start()
 	};
 
 	glGenVertexArrays(1, &VAO);
+	glGenVertexArrays(1, &lightVAO);
 	glGenBuffers(1, &VBO);
 
 	glBindVertexArray(VAO);
@@ -270,14 +276,21 @@ void Start()
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(2);
 	glBindVertexArray(0);
+
+	glBindVertexArray(lightVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vec), vec, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(0);
+	glBindVertexArray(0);
 }
 
 void Update()
 {
 	num += 0.001f;
 
-	GLfloat lightX = sinf(SDL_GetTicks() * 0.001f) * 10.0f;
-	GLfloat lightZ = cosf(SDL_GetTicks() * 0.001f) * 10.0f;
+	GLfloat lightX = sinf(SDL_GetTicks() * 0.0005f) * 10.0f;
+	GLfloat lightZ = cosf(SDL_GetTicks() * 0.0005f) * 10.0f;
 
 	glm::mat4 projection;
 	glm::mat4 view;
@@ -285,51 +298,58 @@ void Update()
 	projection = glm::perspective(45.0f, 800.0f/600.0f, 0.1f, 100.0f);
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
 
-	glUseProgram(program);
+	glUseProgram(program[0]);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glUniform1i(gTexture1, 0);
 
-	glUniformMatrix4fv(gProj, 1, GL_FALSE, glm::value_ptr(projection));
-	glUniformMatrix4fv(gView, 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(gProj[0], 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(gView[0], 1, GL_FALSE, glm::value_ptr(view));
 	
-	glUniform1f(gAmbientStrength, 0.8f);
-	glUniform3f(gObjectColor, 1.0f, 1.0f, 1.0f);
-	glUniform3f(gLightColor, 0.5f, 0.5f, 1.0f);
-	glUniform3f(gLightPosition, lightX, 5.0f, lightZ);
+	glUniform1f(gAmbientStrength, 0.2f);
+	glUniform3f(gObjectColor[0], 1.0f, 1.0f, 1.0f);
+	glUniform3f(gLightColor, 1.0f, 1.0f, 1.0f);
+	glUniform3f(gLightPosition, lightX, 1.0f, lightZ);
 
 	glBindVertexArray(VAO);
 		for(int i = 0; i < 10; i++)
 		{
 			glm::mat4 model;
 			model = glm::translate(model, posBox[i]);
-			//model = glm::rotate(model, 20.0f * i, glm::vec3(1.0f, 0.3f, 0.5f));
+			model = glm::rotate(model, 20.0f * i, glm::vec3(1.0f, 0.3f, 0.5f));
 
-			glUniformMatrix4fv(gModel, 1, GL_FALSE, glm::value_ptr(model));
+			glUniformMatrix4fv(gModel[0], 1, GL_FALSE, glm::value_ptr(model));
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 	glBindVertexArray(0);
 
-	glUniform1f(gAmbientStrength, 1.0f);
-	glUniform3f(gObjectColor, 0.5f, 0.5f, 1.0f);
-	glBindVertexArray(VAO);
+	glUseProgram(program[1]);
+
+	glUniformMatrix4fv(gProj[1], 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(gView[1], 1, GL_FALSE, glm::value_ptr(view));
+
+	glUniform3f(gObjectColor[1], 1.0f, 1.0f, 1.0f);
+	glBindVertexArray(lightVAO);
 		glm::mat4 light;
-		light = glm::translate(light, glm::vec3(lightX, 5.0f, lightZ));
+		light = glm::translate(light, glm::vec3(lightX, 1.0f, lightZ));
 		light = glm::scale(light, glm::vec3(0.5f, 0.5f, 0.5f));
-		glUniformMatrix4fv(gModel, 1, GL_FALSE, glm::value_ptr(light));
+		glUniformMatrix4fv(gModel[1], 1, GL_FALSE, glm::value_ptr(light));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 }
 
 void Close()
 {
-	glDetachShader(program, vertexShader);
-	glDeleteShader(vertexShader);
-	glDetachShader(program, fragmentShader);
-	glDeleteShader(fragmentShader);
-	glDeleteProgram(program);
+	for(int i = 0; i < 2; i++)
+	{
+		glDetachShader(program[i], vertexShader[i]);
+		glDeleteShader(vertexShader[i]);
+		glDetachShader(program[i], fragmentShader[i]);
+		glDeleteShader(fragmentShader[i]);
+		glDeleteProgram(program[i]);
+	}
 
 	SDL_GL_DeleteContext(gl);
 	SDL_DestroyWindow(window);
