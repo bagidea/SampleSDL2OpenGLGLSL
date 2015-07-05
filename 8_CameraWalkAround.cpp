@@ -26,9 +26,6 @@ GLuint gTransformation;
 
 GLuint gTexture1;
 
-GLfloat num;
-bool chk;
-
 unsigned int tex;
 
 glm::vec3 posBox[10];
@@ -188,9 +185,6 @@ void Start()
 	
 	gTexture1 = glGetUniformLocation(program, "outTexture1");
 
-	num = 0.0f;
-	chk = false;
-
 	tex = LoadImage("source/box.png");
 
 	posBox[0] = glm::vec3( 0.0f,  0.0f,  0.0f);
@@ -323,8 +317,6 @@ void KeyboardController(glm::vec3 dir, glm::vec3 right, GLfloat speed)
 void Update()
 {
 	MouseController();
-
-	num += 0.0001f;
 
 	glm::mat4 projection;
 	glm::mat4 view;

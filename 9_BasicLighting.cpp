@@ -33,9 +33,7 @@ GLuint gTexture1;
 GLuint gObjectColor[2];
 GLuint gLightColor;
 GLuint gLightPosition;
-
-GLfloat num;
-bool chk;
+GLuint gViewPosition;
 
 unsigned int tex;
 
@@ -209,8 +207,7 @@ void Start()
 	gLightColor = glGetUniformLocation(program[0], "lightColor");
 	gLightPosition = glGetUniformLocation(program[0], "lightPosition");
 
-	num = 0.0f;
-	chk = false;
+	gViewPosition =  glGetUniformLocation(program[0], "viewPosition");
 
 	tex = LoadImage("source/box.png");
 
@@ -355,8 +352,6 @@ void Update()
 {
 	MouseController();
 
-	num += 0.001f;
-
 	GLfloat lightX = sinf(SDL_GetTicks() * 0.0005f) * 10.0f;
 	GLfloat lightZ = cosf(SDL_GetTicks() * 0.0005f) * 10.0f;
 
@@ -390,6 +385,8 @@ void Update()
 	glUniform3f(gObjectColor[0], 0.8f, 0.8f, 0.8f);
 	glUniform3f(gLightColor, colorR, colorG, colorB);
 	glUniform3f(gLightPosition, lightX, 1.0f, lightZ);
+
+	glUniform3f(gViewPosition, camPos.x, camPos.y, camPos.z);
 
 	glBindVertexArray(VAO);
 		for(int i = 0; i < 10; i++)

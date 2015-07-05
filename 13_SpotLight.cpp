@@ -34,6 +34,7 @@ GLuint gTexture2;
 GLuint gObjectColor[2];
 GLuint gLightColor;
 GLuint gLightPosition;
+GLuint gViewPosition;
 GLuint gShininess;
 
 GLuint gConstant;
@@ -43,9 +44,6 @@ GLuint gQuadratic;
 GLuint gLightDirection;
 GLuint gCutOff;
 GLuint gOuterCutOff;
-
-GLfloat num;
-bool chk;
 
 unsigned int tex;
 unsigned int tex2;
@@ -218,6 +216,7 @@ void Start()
 	gObjectColor[1] = glGetUniformLocation(program[1], "objectColor");
 	gLightColor = glGetUniformLocation(program[0], "lightColor");
 	gLightPosition = glGetUniformLocation(program[0], "lightPosition");
+	gViewPosition = glGetUniformLocation(program[0], "viewPosition");
 	gShininess = glGetUniformLocation(program[0], "shininess");
 
 	gConstant = glGetUniformLocation(program[0], "constant");
@@ -227,9 +226,6 @@ void Start()
 	gLightDirection = glGetUniformLocation(program[0], "lightDirection");
 	gCutOff = glGetUniformLocation(program[0], "cutOff");
 	gOuterCutOff = glGetUniformLocation(program[0], "outerCutOff");
-
-	num = 0.0f;
-	chk = false;
 
 	tex = LoadImage("source/box.jpg");
 	tex2 = LoadImage("source/box_spec.jpg");
@@ -364,8 +360,6 @@ void Update()
 {
 	MouseController();
 
-	num += 0.001f;
-
 	glm::mat4 projection;
 	glm::mat4 view;
 
@@ -396,6 +390,7 @@ void Update()
 	glUniform3f(gObjectColor[0], 0.8f, 0.8f, 0.8f);
 	glUniform3f(gLightColor, 1.0f, 1.0f, 1.0f);
 	glUniform3f(gLightPosition, camPos.x, camPos.y, camPos.z);
+	glUniform3f(gViewPosition, camPos.x, camPos.y, camPos.z);
 	glUniform1f(gShininess, 64.0f);
 
 	glUniform1f(gConstant, 1.0f);

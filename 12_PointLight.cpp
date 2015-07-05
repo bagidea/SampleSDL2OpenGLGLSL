@@ -34,14 +34,12 @@ GLuint gTexture2;
 GLuint gObjectColor[2];
 GLuint gLightColor;
 GLuint gLightPosition;
+GLuint gViewPosition;
 GLuint gShininess;
 
 GLuint gConstant;
 GLuint gLinear;
 GLuint gQuadratic;
-
-GLfloat num;
-bool chk;
 
 unsigned int tex;
 unsigned int tex2;
@@ -214,14 +212,12 @@ void Start()
 	gObjectColor[1] = glGetUniformLocation(program[1], "objectColor");
 	gLightColor = glGetUniformLocation(program[0], "lightColor");
 	gLightPosition = glGetUniformLocation(program[0], "lightPosition");
+	gViewPosition = glGetUniformLocation(program[0], "viewPosition");
 	gShininess = glGetUniformLocation(program[0], "shininess");
 
 	gConstant = glGetUniformLocation(program[0], "constant");
 	gLinear = glGetUniformLocation(program[0], "linear");
 	gQuadratic = glGetUniformLocation(program[0], "quadratic");
-
-	num = 0.0f;
-	chk = false;
 
 	tex = LoadImage("source/box.jpg");
 	tex2 = LoadImage("source/box_spec.jpg");
@@ -356,8 +352,6 @@ void Update()
 {
 	MouseController();
 
-	num += 0.001f;
-
 	GLfloat lightX = sinf(SDL_GetTicks() * 0.0005f) * 3.0f;
 	GLfloat lightZ = cosf(SDL_GetTicks() * 0.0005f) * 3.0f;
 
@@ -391,6 +385,7 @@ void Update()
 	glUniform3f(gObjectColor[0], 0.8f, 0.8f, 0.8f);
 	glUniform3f(gLightColor, 1.0f, 1.0f, 1.0f);
 	glUniform3f(gLightPosition, lightX+3.0f, 1.0f, lightZ+3.0f);
+	glUniform3f(gViewPosition, camPos.x, camPos.y, camPos.z);
 	glUniform1f(gShininess, 64.0f);
 
 	glUniform1f(gConstant, 1.0f);

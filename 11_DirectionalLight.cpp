@@ -34,10 +34,8 @@ GLuint gTexture2;
 GLuint gObjectColor;
 GLuint gLightColor;
 GLuint gLightDirection;
+GLuint gViewPosition;
 GLuint gShininess;
-
-GLfloat num;
-bool chk;
 
 unsigned int tex;
 unsigned int tex2;
@@ -205,10 +203,8 @@ void Start()
 	gObjectColor = glGetUniformLocation(program[0], "objectColor");
 	gLightColor = glGetUniformLocation(program[0], "lightColor");
 	gLightDirection = glGetUniformLocation(program[0], "lightDirection");
+	gViewPosition = glGetUniformLocation(program[0], "viewPosition");
 	gShininess = glGetUniformLocation(program[0], "shininess");
-
-	num = 0.0f;
-	chk = false;
 
 	tex = LoadImage("source/box.jpg");
 	tex2 = LoadImage("source/box_spec.jpg");
@@ -335,8 +331,6 @@ void Update()
 {
 	MouseController();
 
-	num += 0.001f;
-
 	glm::mat4 projection;
 	glm::mat4 view;
 
@@ -367,6 +361,7 @@ void Update()
 	glUniform3f(gObjectColor, 0.8f, 0.8f, 0.8f);
 	glUniform3f(gLightColor, 1.0f, 1.0f, 1.0f);
 	glUniform3f(gLightDirection, -10.0f, -5.0f, 10.0f);
+	glUniform3f(gViewPosition, camPos.x, camPos.y, camPos.z);
 	glUniform1f(gShininess, 64.0f);
 
 	glBindVertexArray(VAO);

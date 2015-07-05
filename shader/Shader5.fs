@@ -28,8 +28,8 @@ void main()
 
 	//Specular
 	vec3 viewDir = normalize(viewPosition - fragPosition);
-	vec3 reflectDir = reflect(lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 32);
+	vec3 reflectDir = reflect(-lightDir, norm);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 64);
 	vec3 specular = specularStrength * spec * lightColor;
 
 	vec3 result = (ambient + diffuse + specular) * objectColor;

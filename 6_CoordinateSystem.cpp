@@ -24,9 +24,6 @@ GLuint gTransformation;
 
 GLuint gTexture1;
 
-GLfloat num;
-bool chk;
-
 unsigned int tex;
 
 glm::vec3 posBox[10];
@@ -183,9 +180,6 @@ void Start()
 	
 	gTexture1 = glGetUniformLocation(program, "outTexture1");
 
-	num = 0.0f;
-	chk = false;
-
 	tex = LoadImage("source/box.png");
 
 	posBox[0] = glm::vec3( 0.0f,  0.0f,  0.0f);
@@ -258,8 +252,6 @@ void Start()
 
 void Update()
 {
-	num += 0.001f;
-
 	glm::mat4 projection;
 	glm::mat4 view;
 
