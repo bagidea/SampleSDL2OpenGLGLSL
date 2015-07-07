@@ -410,7 +410,7 @@ void Init()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 	SDL_Init(SDL_INIT_EVERYTHING);
-	window = SDL_CreateWindow("Assimp Loader", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
+	window = SDL_CreateWindow("Assimp Loader and Lighting", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
 	
 	IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
 
@@ -418,9 +418,9 @@ void Init()
 	glewInit();
 
 	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	shader = LoadShader("shader/Shader10.vs", "shader/Shader10.fs");
+	shader = LoadShader("shader/Shader11.vs", "shader/Shader11.fs");
 }
 
 void Start()
@@ -515,6 +515,24 @@ void Update()
 	glUniformMatrix4fv(glGetUniformLocation(shader.program, "projection"), 1, GL_FALSE, glm::value_ptr(_projection));
 	glUniformMatrix4fv(glGetUniformLocation(shader.program, "view"), 1, GL_FALSE, glm::value_ptr(_view));
 	glUniformMatrix4fv(glGetUniformLocation(shader.program, "model"), 1, GL_FALSE, glm::value_ptr(_model));
+
+	glUniform3f(glGetUniformLocation(shader.program, "viewPos"), camPos.x, camPos.y, camPos.z);
+	// Point light 1
+	glUniform3f(glGetUniformLocation(shader.program, "pointLights[0].position"), 2.3f, -1.6f, -3.0f);		
+	glUniform3f(glGetUniformLocation(shader.program, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);		
+	glUniform3f(glGetUniformLocation(shader.program, "pointLights[0].diffuse"), 1.0f, 1.0f, 1.0f); 
+	glUniform3f(glGetUniformLocation(shader.program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
+	glUniform1f(glGetUniformLocation(shader.program, "pointLights[0].constant"), 1.0f);
+	glUniform1f(glGetUniformLocation(shader.program, "pointLights[0].linear"), 0.009);
+	glUniform1f(glGetUniformLocation(shader.program, "pointLights[0].quadratic"), 0.0032);		
+	// Point light 2
+	glUniform3f(glGetUniformLocation(shader.program, "pointLights[1].position"), -1.7f, 0.9f, 1.0f);		
+	glUniform3f(glGetUniformLocation(shader.program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);		
+	glUniform3f(glGetUniformLocation(shader.program, "pointLights[1].diffuse"), 1.0f, 1.0f, 1.0f); 
+	glUniform3f(glGetUniformLocation(shader.program, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
+	glUniform1f(glGetUniformLocation(shader.program, "pointLights[1].constant"), 1.0f);
+	glUniform1f(glGetUniformLocation(shader.program, "pointLights[1].linear"), 0.009);
+	glUniform1f(glGetUniformLocation(shader.program, "pointLights[1].quadratic"), 0.0032);	
 
 	model.Draw(shader);
 }
