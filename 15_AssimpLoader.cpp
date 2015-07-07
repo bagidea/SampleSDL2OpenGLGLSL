@@ -521,6 +521,12 @@ void Update()
 
 void Close()
 {
+	glDetachShader(shader.program, shader.vertexShader);
+	glDeleteShader(shader.vertexShader);
+	glDetachShader(shader.program, shader.fragmentShader);
+	glDeleteShader(shader.fragmentShader);
+	glDeleteProgram(shader.program);
+	
 	SDL_GL_DeleteContext(gl);
 	SDL_DestroyWindow(window);
 	window = NULL;
