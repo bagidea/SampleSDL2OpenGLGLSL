@@ -7,7 +7,7 @@ SET Library=-LC:\SDL\SDL2-2.0.3\lib -LC:\SDL\SDL2-2.0.3\i686-w64-mingw32\lib -LC
 SET Flag_Compile=-w -Wl,-subsystem,windows
 SET Flag_Library=-lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lopengl32 -lglew32 -lglew32mx -lassimp
 
-SET Source=16_AssimpLoaderAndLighting.cpp
+SET Source=1_HelloSDL2OpenGL.cpp
 
 SET Debug=n
 SET /P Debug=You can show Debug (y): 
