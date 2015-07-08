@@ -23,8 +23,13 @@ ar cr lib/libglew32mx.a src/glew.mx.o
 3. Download GLM
      -GLM (http://glm.g-truc.net)
    Extract File to C:/SDL/* - glm
+
+4. Download Assimp
+     -Assimp (http://assimp.sourceforge.net) or Assimp Build Already (https://www.dropbox.com/s/7tgj63tvpiiewyi/Assimp3-1-1_MinGW4-8-1_Win32.zip)
+   If you download from assimp website, You need Build using Cmake. And copy include folder and .a file to C:/assimp/*
+   But you download Assimp Build Already, You can Extact File to C:/assimp/*
    
-4. Compile Sample - Double-Click CompileAndRun.bat
+5. Compile Sample - Double-Click CompileAndRun.bat
    You can change File for Compile - CompileAndRun.bat : Line 10
 
 Enjoy.
