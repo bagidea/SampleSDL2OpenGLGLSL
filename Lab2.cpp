@@ -6,6 +6,7 @@
 
 #include <GL/glew.h>
 #include <SDL.h>
+#include <SDL_opengl.h>
 #include <SDL_image.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -69,6 +70,7 @@ void Mesh::Draw(Shader _shader)
 {
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
+	GLuint reflectionNr = 1;
 
 	for(GLuint i = 0; i < textures.size(); i++)
 	{
@@ -83,6 +85,10 @@ void Mesh::Draw(Shader _shader)
 			ss << diffuseNr++;
 		}
 		else if(name == "texture_specular")
+		{
+			ss << specularNr++;
+		}
+		else if(name == "texture_reflection")
 		{
 			ss << specularNr++;
 		}
@@ -144,6 +150,7 @@ public:
 private:
 	vector<Mesh> meshes;
 	string directory;
+	vector<Texture> textures_loaded;
 
 	void ProcessNode(aiNode* node, const aiScene* scene);
 	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
@@ -239,6 +246,9 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
 		vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+		vector<Texture> reflectionMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_reflection");
+		textures.insert(textures.end(), reflectionMaps.begin(), reflectionMaps.end());
 	}
 
 	return Mesh(vertices, indices, textures);
@@ -253,11 +263,27 @@ vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type,
 		aiString str;
 		mat->GetTexture(type, i, &str);
 
-		Texture texture;
-		texture.id = LoadImage(directory+"/"+str.C_Str());
-		texture.type = typeName;
-		texture.path = str;
-		textures.push_back(texture);
+		GLboolean skip = false;
+
+		for(GLuint j = 0; j < textures_loaded.size(); j++)
+		{
+			if(textures_loaded[j].path == str)
+			{
+ 				textures.push_back(textures_loaded[j]);
+				skip = true;
+				break;
+			}
+		}
+
+		if(!skip)
+		{
+			Texture texture;
+			texture.id = LoadImage(directory+"/"+str.C_Str());
+			texture.type = typeName;
+			texture.path = str;
+			textures.push_back(texture);
+			textures_loaded.push_back(texture);
+		}
 	}
 
 	return textures;
@@ -480,7 +506,7 @@ void Init()
 	glDepthFunc(GL_LESS);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-	shader = LoadShader("shader/Shader11.vs", "shader/Shader11_2.fs");
+	shader = LoadShader("shader/Shader11_2.vs", "shader/Shader11_3.fs");
 	shaderSkybox = LoadShader("shader/Shader12.vs", "shader/Shader12.fs");
 }
 
@@ -640,12 +666,11 @@ void Update()
 	glUniformMatrix4fv(glGetUniformLocation(shader.program, "view"), 1, GL_FALSE, glm::value_ptr(_view));
 	glUniformMatrix4fv(glGetUniformLocation(shader.program, "model"), 1, GL_FALSE, glm::value_ptr(_model));
 
-	glUniform3f(glGetUniformLocation(shader.program, "viewPos"), camPos.x, camPos.y, camPos.z);
-
-	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.direction"), -5.0f, 0.0f, -10.0f);
-	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.ambient"), 0.8f, 0.8f, 0.8f);
-	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.diffuse"), 1.0f, 1.0f, 2.0f);
-	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.specular"), 0.8f, 0.8f, 0.8f);
+	glUniform3f(glGetUniformLocation(shader.program, "cameraPos"), camPos.x, camPos.y, camPos.z);
+                
+	glActiveTexture(GL_TEXTURE3);
+	glUniform1i(glGetUniformLocation(shader.program, "skybox"), 3);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTex);  
 
 	model.Draw(shader);
 
@@ -684,7 +709,7 @@ void Close()
 	glDetachShader(shaderSkybox.program, shaderSkybox.fragmentShader);
 	glDeleteShader(shaderSkybox.fragmentShader);
 	glDeleteProgram(shaderSkybox.program);
-	
+
 	SDL_GL_DeleteContext(gl);
 	SDL_DestroyWindow(window);
 	window = NULL;
