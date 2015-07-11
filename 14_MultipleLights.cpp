@@ -443,7 +443,7 @@ void Update()
 	//Directional Light
 	glUniform3f(gDirectionalLight_direction, -10.0f, -5.0f, 10.0f);
 	glUniform3f(gDirectionalLight_ambient, 0.05f, 0.05f, 0.05f);
-	glUniform3f(gDirectionalLight_diffuse, 0.3f, 0.05f, 0.05f);	
+	glUniform3f(gDirectionalLight_diffuse, 0.3f, 0.05f, 0.05f);
 	glUniform3f(gDirectionalLight_specular, 0.1f, 0.1f, 0.1f);
 
 	//Point Lights
