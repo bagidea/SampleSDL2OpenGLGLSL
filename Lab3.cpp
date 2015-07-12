@@ -735,7 +735,7 @@ void Update()
 
 	glUniform3f(glGetUniformLocation(shader.program, "viewPos"), camPos.x, camPos.y, camPos.z);
 
-	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.direction"), 5.0f, 0.0f, 10.0f);
+	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.direction"), 5.0f, 0.0f, -10.0f);
 	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.ambient"), 0.5f, 0.5f, 0.5f);
 	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.diffuse"), 0.5f, 0.5f, 0.2f);
 	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.specular"), 0.1f, 0.1f, 0.1f);
@@ -752,7 +752,8 @@ void Update()
 	model.Draw(shader);
 
 	//SkyBox
-	_view = glm::lookAt(glm::vec3(0.0f), camDir, camUp);
+	glm::vec3 camDir2(cosf(-camPitch) * sinf(camYaw), sinf(-camPitch), cosf(-camPitch) * cosf(camYaw));
+	_view = glm::lookAt(glm::vec3(0.0f), -camDir2, camUp);
 
 	glDepthFunc(GL_LEQUAL);
     

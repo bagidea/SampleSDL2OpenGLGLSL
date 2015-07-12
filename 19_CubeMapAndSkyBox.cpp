@@ -628,7 +628,7 @@ void Update()
 	glm::vec3 camUp = cross(camRight, camDir);
 
 	_view = glm::lookAt(camPos, camPos + camDir, camUp);
-	KeyboardController(camDir, camRight, 0.0025f);
+	KeyboardController(camDir, camRight, 0.005f);
 
 	_model = glm::translate(_model, glm::vec3(0.0f, -1.75f, 0.0f));
 	_model = glm::scale(_model, glm::vec3(0.2f, 0.2f, 0.2f));
@@ -642,7 +642,7 @@ void Update()
 
 	glUniform3f(glGetUniformLocation(shader.program, "viewPos"), camPos.x, camPos.y, camPos.z);
 
-	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.direction"), -5.0f, 0.0f, 10.0f);
+	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.direction"), -5.0f, 0.0f, -10.0f);
 	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.ambient"), 0.8f, 0.8f, 0.8f);
 	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.diffuse"), 1.0f, 1.0f, 2.0f);
 	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.specular"), 0.8f, 0.8f, 0.8f);
@@ -650,7 +650,8 @@ void Update()
 	model.Draw(shader);
 
 	//SkyBox
-	_view = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f) + camDir, camUp);
+	glm::vec3 camDir2(cosf(-camPitch) * sinf(camYaw), sinf(-camPitch), cosf(-camPitch) * cosf(camYaw));
+	_view = glm::lookAt(glm::vec3(0.0f), -camDir2, camUp);
 	
 	glDepthFunc(GL_LEQUAL);
     

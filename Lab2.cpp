@@ -654,7 +654,7 @@ void Update()
 	glm::vec3 camUp = cross(camRight, camDir);
 
 	_view = glm::lookAt(camPos, camPos + camDir, camUp);
-	KeyboardController(camDir, camRight, 0.01f);
+	KeyboardController(camDir, camRight, 0.005f);
 
 	_model = glm::translate(_model, glm::vec3(0.0f, -1.75f, 0.0f));
 	_model = glm::scale(_model, glm::vec3(0.2f, 0.2f, 0.2f));
@@ -675,7 +675,8 @@ void Update()
 	model.Draw(shader);
 
 	//SkyBox
-	_view = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f) + camDir, camUp);
+	glm::vec3 camDir2(cosf(-camPitch) * sinf(camYaw), sinf(-camPitch), cosf(-camPitch) * cosf(camYaw));
+	_view = glm::lookAt(glm::vec3(0.0f), -camDir2, camUp);
 
 	glDepthFunc(GL_LEQUAL);
     
