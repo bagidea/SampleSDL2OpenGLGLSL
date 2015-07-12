@@ -654,7 +654,7 @@ void Update()
 	glm::vec3 camUp = cross(camRight, camDir);
 
 	_view = glm::lookAt(camPos, camPos + camDir, camUp);
-	KeyboardController(camDir, camRight, 0.0025f);
+	KeyboardController(camDir, camRight, 0.01f);
 
 	_model = glm::translate(_model, glm::vec3(0.0f, -1.75f, 0.0f));
 	_model = glm::scale(_model, glm::vec3(0.2f, 0.2f, 0.2f));
@@ -674,9 +674,8 @@ void Update()
 
 	model.Draw(shader);
 
-	glm::mat4 _sky;
-	_sky = glm::translate(_sky, glm::vec3(camPos.x, camPos.y, camPos.z));
-	_sky = glm::rotate(_sky, 180.0f*(MATH_PI/180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	//SkyBox
+	_view = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f) + camDir, camUp);
 
 	glDepthFunc(GL_LEQUAL);
     
@@ -684,7 +683,6 @@ void Update()
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderSkybox.program, "projection"), 1, GL_FALSE, glm::value_ptr(_projection));
 	glUniformMatrix4fv(glGetUniformLocation(shaderSkybox.program, "view"), 1, GL_FALSE, glm::value_ptr(_view));
-	glUniformMatrix4fv(glGetUniformLocation(shaderSkybox.program, "model"), 1, GL_FALSE, glm::value_ptr(_sky));
 
 	glBindVertexArray(skyVAO);
 	glActiveTexture(GL_TEXTURE0);

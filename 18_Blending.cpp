@@ -39,8 +39,6 @@ GLuint gTexture1;
 unsigned int tex;
 unsigned int tex2;
 
-glm::vec3 posBox[5];
-
 glm::vec3 camPos;
 GLfloat camYaw, camPitch, lastX, lastY;
 
@@ -205,12 +203,6 @@ void Start()
 
 	tex = LoadImage("source/grassFloor.jpg");
 	tex2 = LoadImage("source/grass.png");
-
-	posBox[0] = glm::vec3( 0.0f,  0.0f,  0.0f);
-  	posBox[1] = glm::vec3( 2.0f,  1.0f, 3.0f); 
-  	posBox[2] = glm::vec3(-1.5f, -1.2f, 2.5f); 
-	posBox[3] = glm::vec3(-3.8f, -1.0f, 8.3f);  
-	posBox[4] = glm::vec3( 2.4f, -0.4f, 3.5f);  
 
 	GLfloat vec[] = {
 	    -0.5f, 0.0f, -0.5f,  0.0f, 1.0f,

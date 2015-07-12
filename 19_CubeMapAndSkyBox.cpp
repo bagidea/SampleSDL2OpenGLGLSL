@@ -642,24 +642,22 @@ void Update()
 
 	glUniform3f(glGetUniformLocation(shader.program, "viewPos"), camPos.x, camPos.y, camPos.z);
 
-	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.direction"), -5.0f, 0.0f, -10.0f);
+	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.direction"), -5.0f, 0.0f, 10.0f);
 	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.ambient"), 0.8f, 0.8f, 0.8f);
 	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.diffuse"), 1.0f, 1.0f, 2.0f);
 	glUniform3f(glGetUniformLocation(shader.program, "directionalLight.specular"), 0.8f, 0.8f, 0.8f);
 
 	model.Draw(shader);
 
-	glm::mat4 _sky;
-	_sky = glm::translate(_sky, glm::vec3(camPos.x, camPos.y, camPos.z));
-	_sky = glm::rotate(_sky, 180.0f*(MATH_PI/180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
+	//SkyBox
+	_view = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f) + camDir, camUp);
+	
 	glDepthFunc(GL_LEQUAL);
     
     glUseProgram(shaderSkybox.program);	
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderSkybox.program, "projection"), 1, GL_FALSE, glm::value_ptr(_projection));
 	glUniformMatrix4fv(glGetUniformLocation(shaderSkybox.program, "view"), 1, GL_FALSE, glm::value_ptr(_view));
-	glUniformMatrix4fv(glGetUniformLocation(shaderSkybox.program, "model"), 1, GL_FALSE, glm::value_ptr(_sky));
 
 	glBindVertexArray(skyVAO);
 	glActiveTexture(GL_TEXTURE0);
